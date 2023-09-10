@@ -27,6 +27,7 @@ let is_palindrome list = list = List.rev list
 
 type 'a node = One of 'a | Many of 'a node list
 
+(* Flatten a List *)
 let flatten list =
   let rec aux acc = function
     | [] -> acc
@@ -35,6 +36,22 @@ let flatten list =
   in
   aux [] list
 
+(* Eliminate Duplicates *)
+let rec compress = function
+  | a :: (b :: _ as t) -> if a = b then compress t else a :: compress t
+  | smaller -> smaller
+
+(* Pack Consecutive Duplicates *)
+let pack list =
+  let rec aux group acc = function
+    | [] -> []
+    | [ a ] -> (a :: group) :: acc
+    | a :: (b :: _ as t) ->
+        if a = b then aux (a :: group) acc t else aux [] ((a :: group) :: acc) t
+  in
+  aux [] [] list
+
+(* Run-Length Encoding *)
 let encode list =
   let rec aux count acc = function
     | [] -> []
@@ -46,6 +63,7 @@ let encode list =
 
 type 'a rle = One of 'a | Many of int * 'a
 
+(* Modified Run-Length Encoding *)
 let encode2 list =
   let to_rle count x = if count = 1 then One x else Many (count, x) in
   let rec aux count acc = function
@@ -57,6 +75,17 @@ let encode2 list =
   in
   List.rev (aux 0 [] list)
 
+(* Decode a Run-Length Encoded List *)
+let decode list =
+  let rec many acc n x = if n = 0 then acc else many (x :: acc) (n - 1) x in
+  let rec aux acc = function
+    | [] -> acc
+    | One x :: t -> aux (x :: acc) t
+    | Many (n, x) :: t -> aux (many acc n x) t
+  in
+  aux [] (List.rev list)
+
+(* Duplicate the Elements of a List *)
 let rec duplicate = function [] -> [] | x :: xs -> x :: x :: duplicate xs
 
 let split list n =
