@@ -88,6 +88,23 @@ let decode list =
 (* Duplicate the Elements of a List *)
 let rec duplicate = function [] -> [] | x :: xs -> x :: x :: duplicate xs
 
+(* Replicate the Elements of a List a Given Number of Times *)
+let replicate list n =
+  let rec prepend n acc x =
+    if n = 0 then acc else prepend (n - 1) (x :: acc) x
+  in
+  let rec aux acc = function [] -> acc | x :: t -> aux (prepend n acc x) t in
+  aux [] (List.rev list)
+
+(* Drop Every N'th Element From a List *)
+let drop list n =
+  let rec aux i = function
+    | [] -> []
+    | x :: t -> if i = n then aux 1 t else x :: aux (i + 1) t
+  in
+  aux 1 list
+
+(* Split a List Into Two Parts; The Length of the First Part Is Given *)
 let split list n =
   let rec aux n acc = function
     | [] -> (List.rev acc, [])
@@ -96,6 +113,25 @@ let split list n =
   in
   aux n [] list
 
+(* Extract a Slice From a List *)
+let slice list a b =
+  let rec aux i = function
+    | [] -> []
+    | _ when i >= b -> []
+    | x :: t -> if i >= a then x :: aux (i + 1) t else aux (i + 1) t
+  in
+  aux 0 list
+
+(* Rotate a List N Places to the Left *)
+let rotate list n =
+  let len = List.length list in
+  let n = if len = 0 then 0 else ((n mod len) + len) mod len in
+  if n = 0 then list
+  else
+    let a, b = split list n in
+    b @ a
+
+(* Remove the K'th Element From a List *)
 let remove_at n list =
   let rec aux i acc = function
     | [] -> acc
@@ -104,11 +140,12 @@ let remove_at n list =
   in
   aux 0 [] list
 
+(* Insert an Element at a Given Position Into a List *)
 let rec insert_at x n = function
   | [] -> [ x ]
   | h :: t as l -> if n = 0 then x :: l else h :: insert_at x (n - 1) t
 
+(* Create a List Containing All Integers Within a Given Range *)
 let range a b =
   let rec aux a b = if a > b then [] else a :: aux (a + 1) b in
-
   if a > b then List.rev (aux b a) else aux a b
