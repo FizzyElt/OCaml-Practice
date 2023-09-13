@@ -44,9 +44,33 @@ let factors2 n =
 (* Calculate Euler's Totient Function Φ(m) (Improved) *)
 let rec pow n p = if p < 1 then 1 else n * pow n (p - 1)
 
+(* Calculate Euler's Totient Function Φ(m) (Improved)  *)
 let phi_improved n =
   let rec aux acc = function
     | [] -> acc
     | (p, m) :: t -> aux ((p - 1) * pow p (m - 1) * acc) t
   in
   aux 1 (factors2 n)
+
+(* A List of Prime Numbers *)
+let rec all_primes a b =
+  if a > b then []
+  else
+    let rest = all_primes (a + 1) b in
+    if is_prime a then a :: rest else rest
+
+(* Goldbach's Conjecture  *)
+let goldbach n =
+  let rec aux d =
+    if is_prime d && is_prime (n - d) then (d, n - d) else aux (d + 1)
+  in
+  aux 2
+
+(* A List of Goldbach Compositions  *)
+let rec goldbach_list a b =
+  if a > b then []
+  else if a mod 2 = 1 then goldbach_list (a + 1) b
+  else (a, goldbach a) :: goldbach_list (a + 2) b
+
+let goldbach_limit a b lim =
+  List.filter (fun (_, (a, b)) -> a > lim && b > lim) (goldbach_list a b)
