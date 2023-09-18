@@ -166,6 +166,7 @@ let layout_binary_tree_1 tree =
   in
   fst (aux tree 1 1)
 
+(* Layout a Binary Tree (2) *)
 let layout_binary_tree_2 t =
   let rec height = function
     | Empty -> 0
@@ -188,6 +189,7 @@ let layout_binary_tree_2 t =
   in
   layout 1 ((1 lsl (tree_height - 1)) - translate_dst) t
 
+(* Layout a Binary Tree (3) *)
 let layout_binary_tree_3 =
   let rec translate_x d = function
     | Empty -> Empty
@@ -223,3 +225,50 @@ let layout_binary_tree_3 =
     let l, t', _ = layout 1 t in
     let x_min = List.fold_left min 0 l in
     translate_x (1 - x_min) t'
+
+let example_layout_tree =
+  let leaf x = Node (x, Empty, Empty) in
+  Node
+    ( 'a',
+      Node ('b', leaf 'd', leaf 'e'),
+      Node ('c', Empty, Node ('f', leaf 'g', Empty)) )
+
+(* A String Representation of Binary Trees *)
+let rec buffer_of_tree buf = function
+  | Empty -> ()
+  | Node (x, l, r) -> (
+      Buffer.add_char buf x;
+      match (l, r) with
+      | Empty, Empty -> ()
+      | _, _ ->
+          Buffer.add_char buf '(';
+          buffer_of_tree buf l;
+          Buffer.add_char buf ',';
+          buffer_of_tree buf r;
+          Buffer.add_char buf ')')
+
+let string_of_tree t =
+  let buf = Buffer.create 128 in
+  buffer_of_tree buf t;
+  Buffer.contents buf
+
+let tree_of_string =
+  let rec make ofs s =
+    if ofs >= String.length s || s.[ofs] = ',' || s.[ofs] = ')' then (Empty, ofs)
+    else
+      let v = s.[ofs] in
+      if ofs + 1 < String.length s && s.[ofs + 1] = '(' then
+        let l, ofs = make (ofs + 2) s in
+        let r, ofs = make (ofs + 1) s in
+        (Node (v, l, r), ofs + 1)
+      else (Node (v, Empty, Empty), ofs + 1)
+  in
+  fun s -> fst (make 0 s)
+
+let rec preorder = function
+  | Empty -> []
+  | Node (v, l, r) -> (v :: preorder l) @ preorder r
+
+let rec inorder = function
+  | Empty -> []
+  | Node (v, l, r) -> inorder l @ (v :: inorder r)
